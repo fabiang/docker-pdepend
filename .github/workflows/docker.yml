@@ -1,0 +1,105 @@
+name: Docker Image
+
+on:
+  push:
+    paths-ignore:
+      - "README.md"
+      - "LICENSE.md"
+  pull_request:
+  schedule:
+    - cron: "0 7 * * 1-4"
+
+jobs:
+  docker-image-alpine:
+    strategy:
+      matrix:
+        version:
+          - pdepend: "2.15.1"
+            pdepend_minor: "2.15"
+            pdepend_major: "2"
+            sha256: "d14701de2c16ba2fdec40b6c73f8c6ba03a60c93b619493ce80a23d161a129d6"
+            latest: true
+
+    env:
+      IMAGE_NAME_FULL: "fabiang/pdepend:${{ matrix.version.pdepend }}"
+      IMAGE_NAME_MINOR: "fabiang/pdepend:${{ matrix.version.pdepend_minor }}"
+      IMAGE_NAME_MAJOR: "fabiang/pdepend:${{ matrix.version.pdepend_major }}"
+      IMAGE_NAME_ALPINE_FULL: "fabiang/pdepend:${{ matrix.version.pdepend }}-alpine"
+      IMAGE_NAME_ALPINE_MINOR: "fabiang/pdepend:${{ matrix.version.pdepend_minor }}-alpine"
+      IMAGE_NAME_ALPINE_MAJOR: "fabiang/pdepend:${{ matrix.version.pdepend_major }}-alpine"
+      IMAGE_LATEST: "fabiang/pdepend:latest"
+      IMAGE_LATEST_ALPINE: "fabiang/pdepend:alpine-latest"
+      IMAGE_LATEST_ALPINE_MINOR: "fabiang/pdepend:${{ matrix.version.pdepend_minor }}-alpine"
+      IMAGE_LATEST_ALPINE_MAJOR: "fabiang/pdepend:${{ matrix.version.pdepend_major }}-alpine"
+
+    runs-on: ubuntu-latest
+
+    name: "PHP Depend v${{ matrix.version.pdepend }}"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Build Image
+        run: |
+          docker build -f alpine/Dockerfile \
+            -t '${{ env.IMAGE_NAME_FULL }}' \
+            -t '${{ env.IMAGE_NAME_ALPINE_FULL }}' \
+            '--build-arg=PDEPEND_VERSION=${{ matrix.version.pdepend }}' \
+            '--build-arg=PDEPEND_DOWNLOAD_SHA256=${{ matrix.version.sha256 }}' \
+            .
+
+      - name: Tag Minor
+        if: "${{ matrix.version.pdepend_minor != '' }}"
+        run: |
+          docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_NAME_MINOR }}'
+          docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_NAME_ALPINE_MINOR }}'
+          docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_LATEST_ALPINE_MINOR }}'
+
+      - name: Tag Major
+        if: "${{ matrix.version.pdepend_major != '' }}"
+        run: |
+          docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_NAME_MAJOR }}'
+          docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_NAME_ALPINE_MAJOR }}'
+          docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_LATEST_ALPINE_MAJOR }}'
+
+      - name: Tag Latest
+        if: "${{ matrix.version.latest == true }}"
+        run: |
+          docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_LATEST }}'
+          docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_LATEST_ALPINE }}'
+
+      - name: Docker Hub login
+        if: "${{ github.ref == 'refs/heads/main' }}"
+        uses: azure/docker-login@v1
+        with:
+          username: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+
+      - name: Push Image
+        if: "${{ github.ref == 'refs/heads/main' }}"
+        run: |
+          docker push '${{ env.IMAGE_NAME_FULL }}'
+          docker push '${{ env.IMAGE_NAME_ALPINE_FULL }}'
+
+      - name: Push Image Minor
+        if: "${{ matrix.version.pdepend_minor != '' && github.ref == 'refs/heads/main' }}"
+        run: |
+          docker push '${{ env.IMAGE_NAME_MINOR }}'
+          docker push '${{ env.IMAGE_NAME_ALPINE_MINOR }}'
+          docker push '${{ env.IMAGE_LATEST_ALPINE_MINOR }}'
+
+      - name: Push Image Major
+        if: "${{ matrix.version.pdepend_major != '' && github.ref == 'refs/heads/main' }}"
+        run: |
+          docker push '${{ env.IMAGE_NAME_MAJOR }}'
+          docker push '${{ env.IMAGE_NAME_ALPINE_MAJOR }}'
+          docker push '${{ env.IMAGE_LATEST_ALPINE_MAJOR }}'
+
+      - name: Push Latest
+        if: "${{ matrix.version.latest == true && github.ref == 'refs/heads/main' }}"
+        run: |
+          docker push '${{ env.IMAGE_LATEST }}'
+          docker push '${{ env.IMAGE_LATEST_ALPINE }}'
