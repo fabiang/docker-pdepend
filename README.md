@@ -1,4 +1,4 @@
-# Docker Image für PHP_Depend
+# Docker Image for PHP_Depend
 
 [PHP Depend](https://github.com/pdepend/pdepend) is a static analysis tool for PHP, 
 mainly for seeing flaws in your code because you have to many dependencies in a class etc.

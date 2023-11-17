@@ -51,6 +51,10 @@ jobs:
             '--build-arg=PDEPEND_DOWNLOAD_SHA256=${{ matrix.version.sha256 }}' \
             .
 
+      - name: Test Image
+        run: |
+          docker run -t --rm '${{ env.IMAGE_NAME_FULL }}' --version
+
       - name: Tag Minor
         if: "${{ matrix.version.pdepend_minor != '' }}"
         run: |
