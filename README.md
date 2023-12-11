@@ -22,4 +22,4 @@ docker run --rm -it fabiang/pdepend:2-alpine --help
 
 ## License
 
-All other parts of the library are licensed under [BSD 2-Clause License](LICENSE.md).
+PHP Depend is licensed under BSD 3-Clause License. This software is licensed under [BSD 2-Clause License](LICENSE.md).
