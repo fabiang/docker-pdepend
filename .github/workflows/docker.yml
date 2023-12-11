@@ -14,11 +14,16 @@ jobs:
     strategy:
       matrix:
         version:
+          - pdepend: "2.16.1"
+            pdepend_minor: "2.16"
+            pdepend_major: "2"
+            sha256: "1f1e280195020fc60bfc008d154a07cb70e86918d84a5c4c5f24c34d093267c4"
+            latest: true
           - pdepend: "2.15.1"
             pdepend_minor: "2.15"
-            pdepend_major: "2"
+            pdepend_major: ""
             sha256: "d14701de2c16ba2fdec40b6c73f8c6ba03a60c93b619493ce80a23d161a129d6"
-            latest: true
+            latest: false
 
     env:
       IMAGE_NAME_FULL: "fabiang/pdepend:${{ matrix.version.pdepend }}"
