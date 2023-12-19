@@ -5,26 +5,25 @@ on:
     paths-ignore:
       - "README.md"
       - "LICENSE.md"
+      - ".editorconfig"
+      - ".github/workflows/auto-update.yml"
   pull_request:
-  schedule:
-    - cron: "0 7 * * 1-4"
 
 jobs:
   docker-image-alpine:
     strategy:
       matrix:
         version:
-          - pdepend: "2.16.1"
-            pdepend_minor: "2.16"
-            pdepend_major: "2"
-            sha256: "1f1e280195020fc60bfc008d154a07cb70e86918d84a5c4c5f24c34d093267c4"
-            latest: true
           - pdepend: "2.15.1"
-            pdepend_minor: "2.15"
             pdepend_major: ""
+            pdepend_minor: "2.15"
             sha256: "d14701de2c16ba2fdec40b6c73f8c6ba03a60c93b619493ce80a23d161a129d6"
             latest: false
-
+          - pdepend: "2.16.1"
+            pdepend_major: "2"
+            pdepend_minor: "2.16"
+            sha256: "1f1e280195020fc60bfc008d154a07cb70e86918d84a5c4c5f24c34d093267c4"
+            latest: true
     env:
       IMAGE_NAME_FULL: "fabiang/pdepend:${{ matrix.version.pdepend }}"
       IMAGE_NAME_MINOR: "fabiang/pdepend:${{ matrix.version.pdepend_minor }}"
