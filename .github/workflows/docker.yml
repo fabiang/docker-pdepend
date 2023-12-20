@@ -1,5 +1,4 @@
 name: Docker Image
-
 on:
   push:
     paths-ignore:
@@ -8,7 +7,6 @@ on:
       - ".editorconfig"
       - ".github/workflows/auto-update.yml"
   pull_request:
-
 jobs:
   docker-image-alpine:
     strategy:
@@ -20,9 +18,14 @@ jobs:
             sha256: "d14701de2c16ba2fdec40b6c73f8c6ba03a60c93b619493ce80a23d161a129d6"
             latest: false
           - pdepend: "2.16.1"
+            pdepend_major: ""
+            pdepend_minor: ""
+            sha256: "1f1e280195020fc60bfc008d154a07cb70e86918d84a5c4c5f24c34d093267c4"
+            latest: false
+          - pdepend: 2.16.2
             pdepend_major: "2"
             pdepend_minor: "2.16"
-            sha256: "1f1e280195020fc60bfc008d154a07cb70e86918d84a5c4c5f24c34d093267c4"
+            sha256: 4a6d0fcc3b56538fc0b04b20b438656f9db90c16ec08d58e0ebfdafecf5ba7d1
             latest: true
     env:
       IMAGE_NAME_FULL: "fabiang/pdepend:${{ matrix.version.pdepend }}"
@@ -35,17 +38,12 @@ jobs:
       IMAGE_LATEST_ALPINE: "fabiang/pdepend:alpine-latest"
       IMAGE_LATEST_ALPINE_MINOR: "fabiang/pdepend:${{ matrix.version.pdepend_minor }}-alpine"
       IMAGE_LATEST_ALPINE_MAJOR: "fabiang/pdepend:${{ matrix.version.pdepend_major }}-alpine"
-
     runs-on: ubuntu-latest
-
     name: "PHP Depend v${{ matrix.version.pdepend }}"
-
     steps:
       - uses: actions/checkout@v3
-
       - uses: jpribyl/action-docker-layer-caching@v0.1.1
         continue-on-error: true
-
       - name: Build Image
         run: |
           docker build -f alpine/Dockerfile \
@@ -54,58 +52,49 @@ jobs:
             '--build-arg=PDEPEND_VERSION=${{ matrix.version.pdepend }}' \
             '--build-arg=PDEPEND_DOWNLOAD_SHA256=${{ matrix.version.sha256 }}' \
             .
-
       - name: Test Image
         run: |
           docker run -t --rm '${{ env.IMAGE_NAME_FULL }}' --version
-
       - name: Tag Minor
         if: "${{ matrix.version.pdepend_minor != '' }}"
         run: |
           docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_NAME_MINOR }}'
           docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_NAME_ALPINE_MINOR }}'
           docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_LATEST_ALPINE_MINOR }}'
-
       - name: Tag Major
         if: "${{ matrix.version.pdepend_major != '' }}"
         run: |
           docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_NAME_MAJOR }}'
           docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_NAME_ALPINE_MAJOR }}'
           docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_LATEST_ALPINE_MAJOR }}'
-
       - name: Tag Latest
         if: "${{ matrix.version.latest == true }}"
         run: |
           docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_LATEST }}'
           docker tag '${{ env.IMAGE_NAME_FULL }}' '${{ env.IMAGE_LATEST_ALPINE }}'
-
       - name: Docker Hub login
         if: "${{ github.ref == 'refs/heads/main' }}"
         uses: azure/docker-login@v1
         with:
           username: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
           password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
-
       - name: Push Image
         if: "${{ github.ref == 'refs/heads/main' }}"
         run: |
           docker push '${{ env.IMAGE_NAME_FULL }}'
           docker push '${{ env.IMAGE_NAME_ALPINE_FULL }}'
-
       - name: Push Image Minor
         if: "${{ matrix.version.pdepend_minor != '' && github.ref == 'refs/heads/main' }}"
         run: |
           docker push '${{ env.IMAGE_NAME_MINOR }}'
           docker push '${{ env.IMAGE_NAME_ALPINE_MINOR }}'
           docker push '${{ env.IMAGE_LATEST_ALPINE_MINOR }}'
-
       - name: Push Image Major
         if: "${{ matrix.version.pdepend_major != '' && github.ref == 'refs/heads/main' }}"
         run: |
           docker push '${{ env.IMAGE_NAME_MAJOR }}'
           docker push '${{ env.IMAGE_NAME_ALPINE_MAJOR }}'
           docker push '${{ env.IMAGE_LATEST_ALPINE_MAJOR }}'
-
       - name: Push Latest
         if: "${{ matrix.version.latest == true && github.ref == 'refs/heads/main' }}"
         run: |
