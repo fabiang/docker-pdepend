@@ -11,8 +11,7 @@ This repository provides a Docker image for PHP depend.
 
 ## Available tags
 
-* 2.16.1, 2.16.1-alpine, 2.16, 2.16-alpine, 2, 2-alpine, latest, latest-alpine
-* 2.15.1, 2.15.1-alpine, 2.15, 2.15-alpine
+[See Docker Hub page](https://hub.docker.com/r/fabiang/pdepend/tags?page=1&ordering=name)
 
 ## Usage
 
