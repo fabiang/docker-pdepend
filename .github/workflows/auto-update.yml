@@ -8,6 +8,7 @@ jobs:
   auto-update:
     name: "Auto-Update Rewinged Docker Image"
     runs-on: ubuntu-latest
+    retention-days: 1
     permissions:
       contents: write
       pull-requests: write
