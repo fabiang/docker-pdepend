@@ -28,9 +28,14 @@ jobs:
             sha256: 4a6d0fcc3b56538fc0b04b20b438656f9db90c16ec08d58e0ebfdafecf5ba7d1
             latest: false
           - pdepend: 3.0.0
-            pdepend_major: "3"
+            pdepend_major: ""
             pdepend_minor: "3.0"
             sha256: 6b562a6ad2706c018c1673f389e77d683a55744c6b9654a737bacc9d2ddca6df
+            latest: false
+          - pdepend: 3.1.0
+            pdepend_major: "3"
+            pdepend_minor: "3.1"
+            sha256: aa56d2637cb38d691b0590357398437edfd637d0161d1d59123eb5b2e2d41c72
             latest: true
     env:
       IMAGE_NAME_FULL: "fabiang/pdepend:${{ matrix.version.pdepend }}"
